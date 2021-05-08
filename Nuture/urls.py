@@ -16,12 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from User.views import AdvisorView
+from User.views import AdvisorView,MyUserView
 
 urlpatterns = [
     path('admin/advisor', AdvisorView.as_view()),
     path('admin/', admin.site.urls),
-    # path('user/register',''),
+    path('user/register',MyUserView.as_view()),
     # path('user/login',''),
     # path('user/logout',''),
 ]

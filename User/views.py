@@ -21,4 +21,20 @@ class AdvisorView(APIView):
         serializer = AdvisorSerializer(qs, many=True)
         return Response(serializer.data)
 
+class MyUserView(APIView):
+
+    def post(self,request,*args, **kwargs):
+        serializer = MyUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            retval = {'id':serializer.data["id"]}
+            return Response(retval,status = status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self,request, *args, **kwargs):
+        # qs = Advisor.objects.all()
+        # serializer = AdvisorSerializer(qs, many=True)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    
 
