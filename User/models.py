@@ -88,3 +88,11 @@ class MyUser(AbstractBaseUser):
         "Is the user a admin member?"
         return self.admin
 
+# default id filed will be created for this model 
+# which will be primary key and will autoincrement.
+# Advisor.id
+class Advisor(models.Model):
+    name = models.CharField(max_length=150)
+    photo_url = models.TextField()
+
+  
