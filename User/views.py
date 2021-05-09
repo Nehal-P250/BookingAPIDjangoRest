@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
 
 import jwt, datetime
 
@@ -71,14 +72,52 @@ class LoginView(APIView):
             'iat': datetime.datetime.utcnow()
         }
 
+        response = Response()
         token = jwt.encode(payload, 'secret', algorithm='HS256') 
         retval = {
             'user_id' : current_user.id,
             'jwt' : token
         }
+        response.set_cookie(key='jwt', value=token,httponly=True)
+        response.data = retval
+        response.status = status.HTTP_200_OK
+        
+       
+        
         # valid user (email, password )MATCH.
-        return Response(retval,status = status.HTTP_200_OK)
+        # return Response(retval,status = status.HTTP_200_OK)
+        return response
 
 
+
+# Assumption : only allowing loged in user to view the Advisor list.
+# For this jwt cookie is used for user authentication.
+class GetAdvisorView(APIView):
     
+    def get(self, request, userID):
+        # get 
+        token = request.COOKIES.get('jwt')
+        print(userID)
+        # return Response(token)
+
+        # user is not loged in.
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+         
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            # jwt decode failed , JWT token is not correct
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        # the url userID and payload userID does not match
+        if userID != payload['id']:
+            raise AuthenticationFailed('Unauthenticated!')
+
+
+        qs = Advisor.objects.all()
+        serializer = AdvisorSerializer(qs, many=True)
+        return Response(serializer.data)
+            
     
