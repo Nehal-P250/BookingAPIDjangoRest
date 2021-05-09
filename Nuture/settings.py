@@ -128,6 +128,7 @@ USE_TZ = True
 
 # this is the location where heroku puts the static files
 STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 
 # Default primary key field type
@@ -136,23 +137,3 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USERS_MODEL = 'User.MyUser'
-
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework.authentication.TokenAuthentication',
-#         'rest_framework.authentication.SessionAuthentication',
-#     ),
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework.authentication.TokenAuthentication',
-#    ),
-# }
-# REST_FRAMEWORK = {
-#      'DEFAULT_PERMISSION_CLASSES': [
-#          'rest_framework.permissions.IsAuthenticated',
-#          'rest_framework.permissions.IsAdminUser',
-#          ],
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#      'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-#      )
-# }
-
