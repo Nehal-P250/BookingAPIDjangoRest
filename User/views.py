@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+import jwt, datetime
+
 from .models import Advisor,MyUser
 from .serializers import (MyUserSerializer,AdvisorSerializer)
 # Create your views here.
@@ -35,18 +37,19 @@ class MyUserView(APIView):
         # qs = Advisor.objects.all()
         # serializer = AdvisorSerializer(qs, many=True)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
+
     
 class LoginView(APIView):
 
     def post(self,request,*args, **kwargs):
         
         if not ('email' in request.data):
-            # one or both the field/'s not preset   
+            # Email Field is not present   
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if not ('password' in request.data):
-            # one or both the field/'s not preset   
+            # password Field is not present    
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         email = request.data['email']
@@ -60,6 +63,22 @@ class LoginView(APIView):
         if not current_user.check_password(password):
             # password does not match 
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        else : 
-            # valid user (email, password )MATCH.
-            return Response({'user_id' : current_user.id})
+
+        
+        payload = {
+            'id': current_user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
+        }
+
+        token = jwt.encode(payload, 'secret', algorithm='HS256') 
+        retval = {
+            'user_id' : current_user.id,
+            'jwt' : token
+        }
+        # valid user (email, password )MATCH.
+        return Response(retval,status = status.HTTP_200_OK)
+
+
+    
+    
