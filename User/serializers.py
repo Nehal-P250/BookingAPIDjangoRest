@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Advisor,MyUser
+from .models import Advisor,MyUser,Booking
 
 class AdvisorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,3 +39,11 @@ class MyUserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    # https://medium.com/@gurupratap.matharu/build-a-restapi-using-nested-serializers-in-django-rest-framework-c0f6a31fd865
+    advisor = AdvisorSerializer()
+    class Meta:
+        model = Booking
+        fields =['id','time','advisor']

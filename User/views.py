@@ -4,12 +4,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 import datetime
-
+import json
 
 import jwt, datetime
 
 from .models import Advisor,MyUser,Booking
-from .serializers import (MyUserSerializer,AdvisorSerializer)
+from .serializers import (MyUserSerializer,AdvisorSerializer,BookingSerializer)
 # Create your views here.
 
 class AdvisorView(APIView):
@@ -164,3 +164,36 @@ class BookAdvisorView(APIView):
         booking.save()
 
         return Response(status = status.HTTP_200_OK)    
+
+
+
+
+# Assumption : only allowing loged in user to view the Advisor list.
+# For this jwt cookie is used for user authentication.
+class GetBookingsView(APIView):
+    
+    def get(self, request, userID):
+        # get JWT token which is set as cookie.
+        token = request.COOKIES.get('jwt')
+        print(userID)
+        
+        # user is not loged in.
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+         
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            # jwt decode failed , JWT token is not correct
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        # the url userID and payload userID does not match
+        if userID != payload['id']:
+            raise AuthenticationFailed('Unauthenticated!')
+        user = MyUser.objects.filter(id=userID).first()
+
+        bookings = Booking.objects.filter(user=user)
+        serialized =  BookingSerializer(bookings,many=True)
+        return Response(serialized.data,status = status.HTTP_200_OK)   
+
