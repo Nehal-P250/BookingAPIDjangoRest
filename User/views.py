@@ -3,10 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
+import datetime
+
 
 import jwt, datetime
 
-from .models import Advisor,MyUser
+from .models import Advisor,MyUser,Booking
 from .serializers import (MyUserSerializer,AdvisorSerializer)
 # Create your views here.
 
@@ -120,4 +122,45 @@ class GetAdvisorView(APIView):
         serializer = AdvisorSerializer(qs, many=True)
         return Response(serializer.data)
             
+
+# Assumption : only allowing loged in user to view the Advisor list.
+# For this jwt cookie is used for user authentication.
+class BookAdvisorView(APIView):
     
+    def get(self, request, userID, advisorID):
+        # get JWT token which is set as cookie.
+        token = request.COOKIES.get('jwt')
+        print(userID)
+        
+        # user is not loged in.
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+
+         
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            # jwt decode failed , JWT token is not correct
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        # the url userID and payload userID does not match
+        if userID != payload['id']:
+            raise AuthenticationFailed('Unauthenticated!')
+        user = MyUser.objects.filter(id=userID).first()
+
+        advisor = Advisor.objects.filter(id=advisorID).first()
+        # no such advisor exists
+        if not advisor: 
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        if not 'booking_time' in request.data:
+            return Response({"Please provide booking_time in the format %d-%m-%Y %H:%M:%S"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # date time format
+        # "%d-%m-%Y %H:%M:%S"
+        time_string = request.data['booking_time']
+        booking = Booking(time= datetime.datetime.strptime(time_string, "%d-%m-%Y %H:%M:%S"),user=user,advisor=advisor)
+        booking.save()
+
+        return Response(status = status.HTTP_200_OK)    

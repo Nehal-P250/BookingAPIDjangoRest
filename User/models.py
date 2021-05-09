@@ -95,4 +95,9 @@ class Advisor(models.Model):
     name = models.CharField(max_length=150)
     photo_url = models.TextField()
 
-  
+
+# same by default id field will be there.
+class Booking(models.Model):
+    time = models.DateTimeField()
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
+    advisor = models.ForeignKey(Advisor, on_delete=models.CASCADE)
