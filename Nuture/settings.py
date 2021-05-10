@@ -23,11 +23,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-j4+-#term2k7=pyvi2(!+7pql7fz$qt6#$@mb*7dq+wk(b)%g9'
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = False
+# DEBUG = os.environ['DEBUG']
 
 ALLOWED_HOSTS = ['nec-django-rest.herokuapp.com', '127.0.0.1']
 
